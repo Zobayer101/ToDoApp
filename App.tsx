@@ -12,10 +12,59 @@ import Settings from './components/Settings';
 import TaskList from './components/Task';
 import Batch from './components/BatchMode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-export const Dalivary = createContext({});
+//inter fase
+interface DalivaryContexType {
+  data: {
+    id: number;
+    title: string;
+    listName: string;
+    YDate: string;
+    TDate: string;
+    chack: boolean;
+  }[];
+  list: {id: number; title: string; lengths: number}[];
+  setData: React.Dispatch<
+    React.SetStateAction<
+      {
+        id: number;
+        title: string;
+        listName: string;
+        YDate: string;
+        TDate: string;
+        chack: boolean;
+      }[]
+    >
+  >;
+  setList: React.Dispatch<
+    React.SetStateAction<{id: number; title: string; lengths: number}[]>
+  >;
+}
+
+export const Dalivary = createContext<DalivaryContexType >({
+  data: [],
+  list: [],
+  setData: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  setList: function (): void {
+    throw new Error('Function not implemented.');
+  },
+});
 const stack = createNativeStackNavigator();
 const App = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<
+    {
+      id: number;
+      title: string;
+      listName: string;
+      YDate: string;
+      TDate: string;
+      chack: boolean;
+    }[]
+  >([]);
+  const [list, setList] = useState<
+    {id: number; title: string; lengths: number}[]
+  >([]);
 
   useEffect(() => {
     (async () => {
@@ -25,11 +74,51 @@ const App = () => {
 
         setData(objDatas);
       }
+      let ListData = await AsyncStorage.getItem('List');
+      if (ListData) {
+        let ObjList = JSON.parse(ListData);
+        setList(ObjList);
+      } else {
+        let ArrObj = [
+          {
+            id: 1,
+            title: 'Default',
+            lengths: 0,
+          },
+          {
+            id: 2,
+            title: 'Holyday',
+            lengths: 0,
+          },
+          {
+            id: 3,
+            title: 'Personal',
+            lengths: 0,
+          },
+          {
+            id: 4,
+            title: 'Shopping',
+            lengths: 0,
+          },
+          {
+            id: 5,
+            title: 'Wishlist',
+            lengths: 0,
+          },
+          {
+            id: 6,
+            title: 'Finished',
+            lengths: 0,
+          },
+        ];
+        setList(ArrObj);
+        await AsyncStorage.setItem('List', JSON.stringify(ArrObj));
+      }
     })();
   }, []);
 
   return (
-    <Dalivary.Provider value={{data, setData}}>
+    <Dalivary.Provider value={{data, setData, list, setList}}>
       <NavigationContainer>
         <stack.Navigator initialRouteName="Home">
           <stack.Screen

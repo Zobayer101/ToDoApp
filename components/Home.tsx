@@ -20,7 +20,7 @@ import Mic from 'react-native-vector-icons/Ionicons';
 import Homex from 'react-native-vector-icons/Fontisto';
 import Delete from 'react-native-vector-icons/MaterialCommunityIcons';
 import Check from 'react-native-vector-icons/AntDesign';
-//import CheckBox from '@react-native-community/checkbox';
+import CheckBox from '@react-native-community/checkbox';
 import {Dalivary} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -60,9 +60,9 @@ const Home = () => {
   const SettingNavigate = useNavigation<settingScreenNavigte>();
   const BatchNavigate = useNavigation<batchScreenNavigate>();
   const taskNavigate = useNavigation<taskScreenNavigate>();
-  const {data, setData} = useContext(Dalivary);
+  const {data, setData, list, setList} = useContext(Dalivary);
+
   const SelectAndRemove = (id: any) => {
-    //Alert.alert(JSON.stringify(id));
     const UpdateData = data.filter((item: {id: any}) => item.id !== id);
     setData(UpdateData);
     console.log(UpdateData);
@@ -154,34 +154,23 @@ const Home = () => {
                   <Text style={style.Texts}>All List</Text>
                   <Text style={style.Texts}>7</Text>
                 </TouchableOpacity>
+                {/* ------------------------------Dinamick List------------------------------------ */}
+                {list[0] &&
+                  list.map(
+                    (value: any, index: React.Key | null | undefined) => (
+                      <TouchableOpacity style={style.HomeList} key={index}>
+                        <Down name="bars" size={30} color={'#fff'} />
+                        <Text style={style.Texts}>{value.title}</Text>
+                        <Text style={style.Texts}>{value.lengths}</Text>
+                      </TouchableOpacity>
+                    ),
+                  )}
 
+                {/* ----------------------Dainamick List-------------------------------- */}
                 <TouchableOpacity style={style.HomeList}>
                   <Down name="bars" size={30} color={'#fff'} />
-                  <Text style={style.Texts}>Default lisht</Text>
-                  <Text style={style.Texts}>9</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={style.HomeList}>
-                  <Down name="bars" size={30} color={'#fff'} />
-                  <Text style={style.Texts}>Default lisht</Text>
-                  <Text style={style.Texts}>9</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={style.HomeList}>
-                  <Down name="bars" size={30} color={'#fff'} />
-                  <Text style={style.Texts}>Default lisht</Text>
-                  <Text style={style.Texts}>9</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={style.HomeList}>
-                  <Down name="bars" size={30} color={'#fff'} />
-                  <Text style={style.Texts}>Default lisht</Text>
-                  <Text style={style.Texts}>9</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={style.HomeList}>
-                  <Down name="bars" size={30} color={'#fff'} />
-                  <Text style={style.Texts}>Default lisht</Text>
-                  <Text style={style.Texts}>9</Text>
+                  <Text style={style.Texts}>Add new List</Text>
+                  <Down name="pluscircleo" color={'#fff'} size={20} />
                 </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
@@ -230,18 +219,18 @@ const Home = () => {
               <View key={index}>
                 <Text style={style.headerTx}>Later</Text>
                 <View style={style.todoCon}>
-                  <TouchableOpacity
+                  {/* <TouchableOpacity
                     onPress={() => SelectAndRemove(value.id)}
                     style={style.Icon}>
                     <Delete name="delete" size={35} color={'#fff'} />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                   <TouchableOpacity style={style.Chekbox}>
                     <View style={style.MainTitlecheckbox}>
-                      {/* <CheckBox
+                      <CheckBox
                         value={value.chack}
                         onChange={() => SelectAndRemove(value.id)}
                         tintColors={{true: 'green', false: '#fff'}}
-                        /> */}
+                      />
                       <Text style={style.textTitle}>{value.title}</Text>
                     </View>
                     <View>
@@ -459,18 +448,19 @@ const style = StyleSheet.create({
     width: '100%',
     marginTop: 10,
     height: 70,
-    //alignItems: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
     flexDirection: 'row',
   },
   Chekbox: {
-    width: 290,
+    width: 340,
     height: 70,
-    borderTopRightRadius: 10,
-    borderBottomRightRadius: 10,
+    borderRadius: 10,
     backgroundColor: '#3c19ff',
     elevation: 8,
     padding: 5,
-    // flexDirection: 'row',
+
+    //flexDirection: 'row',
   },
   MainTitlecheckbox: {
     width: '100%',
