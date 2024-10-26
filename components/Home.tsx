@@ -18,11 +18,12 @@ import Down from 'react-native-vector-icons/AntDesign';
 import Dot from 'react-native-vector-icons/Entypo';
 import Mic from 'react-native-vector-icons/Ionicons';
 import Homex from 'react-native-vector-icons/Fontisto';
-import Delete from 'react-native-vector-icons/MaterialCommunityIcons';
+//import Delete from 'react-native-vector-icons/MaterialCommunityIcons';
 import Check from 'react-native-vector-icons/AntDesign';
 import CheckBox from '@react-native-community/checkbox';
 import {Dalivary} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 type RootStackParamList = {
   Home: undefined;
