@@ -14,6 +14,8 @@ import Batch from './components/BatchMode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 //inter fase
 interface DalivaryContexType {
+  selectList: String;
+  setSelectList: React.Dispatch<string>;
   data: {
     id: number;
     title: string;
@@ -40,13 +42,17 @@ interface DalivaryContexType {
   >;
 }
 
-export const Dalivary = createContext<DalivaryContexType >({
+export const Dalivary = createContext<DalivaryContexType>({
   data: [],
   list: [],
   setData: function (): void {
     throw new Error('Function not implemented.');
   },
   setList: function (): void {
+    throw new Error('Function not implemented.');
+  },
+  selectList: 'default',
+  setSelectList: function (): void {
     throw new Error('Function not implemented.');
   },
 });
@@ -64,7 +70,8 @@ const App = () => {
   >([]);
   const [list, setList] = useState<
     {id: number; title: string; lengths: number}[]
-  >([]);
+    >([]);
+  const [selectList, setSelectList] = useState('default');
 
   useEffect(() => {
     (async () => {
@@ -118,7 +125,8 @@ const App = () => {
   }, []);
 
   return (
-    <Dalivary.Provider value={{data, setData, list, setList}}>
+    <Dalivary.Provider
+      value={{data, setData, list, setList, selectList, setSelectList}}>
       <NavigationContainer>
         <stack.Navigator initialRouteName="Home">
           <stack.Screen

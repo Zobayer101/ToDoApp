@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Image,
   Modal,
@@ -11,6 +11,8 @@ import {
   TouchableWithoutFeedback,
   View,
   Vibration,
+  Platform,
+  Alert,
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Feather';
@@ -23,7 +25,15 @@ import Check from 'react-native-vector-icons/AntDesign';
 import CheckBox from '@react-native-community/checkbox';
 import {Dalivary} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PushNotification from 'react-native-push-notification';
 
+import {PermissionsAndroid} from 'react-native';
+
+async function requestNotificationPermission() {
+  await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+  );
+}
 
 type RootStackParamList = {
   Home: undefined;
@@ -61,7 +71,34 @@ const Home = () => {
   const SettingNavigate = useNavigation<settingScreenNavigte>();
   const BatchNavigate = useNavigation<batchScreenNavigate>();
   const taskNavigate = useNavigation<taskScreenNavigate>();
-  const {data, setData, list, setList} = useContext(Dalivary);
+  const {data, setData, list, setList, selectList, setSelectList} =
+    useContext(Dalivary);
+
+  useEffect(() => {
+    requestNotificationPermission();
+    PushNotification.configure({
+      onNotification: function (notification) {
+        console.log('NOTIFICATION:', notification);
+      },
+      popInitialNotification: true,
+      //requestPermissions: true,
+      requestPermissions: Platform.OS === 'ios',
+    });
+    PushNotification.createChannel(
+      {
+        channelId: 'test-notification', // ID for this channel
+        channelName: 'Test Channel', // Name for this channel
+        channelDescription: 'A channel to send test notifications', // Optional
+        importance: 4, // Required to show heads-up notifications
+        vibrate: true, // Optional
+      },
+      () => '',
+    );
+  }, []);
+
+  useEffect(() => {
+    console.log(selectList);
+  }, [selectList]);
 
   const SelectAndRemove = (id: any) => {
     const UpdateData = data.filter((item: {id: any}) => item.id !== id);
@@ -111,6 +148,21 @@ const Home = () => {
     }
   };
 
+  const HandelNotification = (notification: string) => {
+    //Alert.alert(`Notification ID: ${notification}`);
+
+    PushNotification.localNotification({
+      channelId: 'test-notification', // Ensure it matches the channel ID
+      title: `You clicked on ID: ${notification}`,
+      message: 'This is a local notification message.',
+      importance: 'high', // Ensures visibility on Android
+      priority: 'high',
+      bigText: 'Extended notification text for additional context.',
+      vibrate: true,
+      playSound: true,
+    });
+  };
+
   return (
     <View style={style.Contuner}>
       <View style={style.Header}>
@@ -122,7 +174,7 @@ const Home = () => {
             style={style.Icons}
           />
           <Text onPress={() => setListModal(true)} style={style.HeaderBoldText}>
-            All List
+            {selectList}
           </Text>
           <TouchableOpacity onPress={() => setListModal(true)}>
             <Down name="caretdown" color={'#fff'} size={18} />
@@ -148,18 +200,21 @@ const Home = () => {
         onRequestClose={() => setListModal(false)}>
         <TouchableWithoutFeedback onPress={() => setListModal(false)}>
           <View style={style.ListModal}>
-            <TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => setListModal(false)}>
               <View style={style.MainModalList}>
                 <TouchableOpacity style={style.ListSelect}>
                   <Homex name="home" size={27} color={'#fff'} />
                   <Text style={style.Texts}>All List</Text>
-                  <Text style={style.Texts}>7</Text>
+                  <Text style={style.Texts}>{data.length}</Text>
                 </TouchableOpacity>
                 {/* ------------------------------Dinamick List------------------------------------ */}
                 {list[0] &&
                   list.map(
                     (value: any, index: React.Key | null | undefined) => (
-                      <TouchableOpacity style={style.HomeList} key={index}>
+                      <TouchableOpacity
+                        style={style.HomeList}
+                        key={index}
+                        onPress={() => setSelectList(value.title)}>
                         <Down name="bars" size={30} color={'#fff'} />
                         <Text style={style.Texts}>{value.title}</Text>
                         <Text style={style.Texts}>{value.lengths}</Text>
@@ -216,7 +271,7 @@ const Home = () => {
       <ScrollView style={style.ScrollingArea}>
         {data[0] ? (
           data.map((value: any, index: React.Key | null | undefined) => {
-            return (
+            return value.listName === `${selectList}` ? (
               <View key={index}>
                 <Text style={style.headerTx}>Later</Text>
                 <View style={style.todoCon}>
@@ -225,11 +280,15 @@ const Home = () => {
                     style={style.Icon}>
                     <Delete name="delete" size={35} color={'#fff'} />
                   </TouchableOpacity> */}
-                  <TouchableOpacity style={style.Chekbox}>
+                  <TouchableOpacity
+                    style={style.Chekbox}
+                    onPress={() => HandelNotification(value.id.toString())}>
                     <View style={style.MainTitlecheckbox}>
                       <CheckBox
                         value={value.chack}
-                        onChange={() => SelectAndRemove(value.id)}
+                        onChange={() => {
+                          SelectAndRemove(value.id);
+                        }}
                         tintColors={{true: 'green', false: '#fff'}}
                       />
                       <Text style={style.textTitle}>{value.title}</Text>
@@ -242,7 +301,7 @@ const Home = () => {
                   </TouchableOpacity>
                 </View>
               </View>
-            );
+            ) : null;
           })
         ) : (
           <View style={style.emptyCon}>

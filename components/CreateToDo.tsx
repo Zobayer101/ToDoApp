@@ -15,6 +15,9 @@ import Calender from 'react-native-vector-icons/AntDesign';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Dalivary} from '../App';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+
 const position = new Animated.ValueXY({x: 500, y: 450});
 const ShowAnimate = () => {
   Animated.timing(position, {
@@ -24,15 +27,23 @@ const ShowAnimate = () => {
   }).start();
 };
 ShowAnimate();
-
+type RootStackParamList = {
+  Home: undefined;
+};
+type HomeScreenNavigation = NativeStackNavigationProp<
+  RootStackParamList,
+  'Home'
+>;
 const CreateToDo = () => {
-  const [list, setList] = useState(false);
+  const [listx, setListx] = useState(false);
   const [date, setDate] = useState(new Date());
   const [animate, setAnimate] = useState(false);
   const [dateTime, setDateTime] = useState({date: '', time: ''});
   const [showpic, setPic] = useState(false);
   const [todo, setTodo] = useState(String);
-  const {data, setData} = useContext(Dalivary);
+  const {data, setData, list, setList, selectList, setSelectList} =
+    useContext(Dalivary);
+  const HomeScreen = useNavigation<HomeScreenNavigation>();
   useEffect(() => {
     const setTime = setTimeout(() => {
       setAnimate(false);
@@ -41,17 +52,25 @@ const CreateToDo = () => {
       clearTimeout(setTime);
     };
   }, [animate]);
+  useEffect(() => {
+    console.log(selectList);
+  }, [selectList]);
   const dateTimePickerset = (_e: any, currentDate: any) => {
-    setDate(currentDate || date);
-
     if (dateTime.date) {
-      setDateTime(pre => ({...pre, time: currentDate.toLocaleTimeString()}));
+      setDate(currentDate || date);
+      setDateTime(pre => ({
+        ...pre,
+        time: currentDate.toLocaleTimeString(),
+      }));
       setPic(false);
     } else {
+      setDate(currentDate || date);
       setDateTime(pre => ({...pre, date: currentDate.toLocaleDateString()}));
     }
+
     //if (dateTime.time){ setPic(false);}
   };
+  //-----------------------------Save Data-----------------------------------------;
   const SaveData = async () => {
     if (todo && dateTime.date && dateTime.time) {
       Vibration.vibrate(200);
@@ -63,7 +82,7 @@ const CreateToDo = () => {
         let newObj = {
           id: ID,
           title: todo,
-          listName: 'Default',
+          listName: selectList,
           YDate: dateTime.date,
           TDate: dateTime.time,
           chack: false,
@@ -72,11 +91,13 @@ const CreateToDo = () => {
         if (data[0]) {
           setData((pre: any) => [...pre, newObj]);
           //Alert.alert('Ohoo...');
+          HomeScreen.navigate('Home');
         } else {
           //console.log(todoNewData);
           //setData((pre: any) => [...pre, newObj]);
           setData(todoNewData);
           //Alert.alert('bal..');
+          HomeScreen.navigate('Home');
         }
 
         await AsyncStorage.setItem('ToDos', JSON.stringify(todoNewData));
@@ -90,7 +111,7 @@ const CreateToDo = () => {
           {
             id: 1,
             title: todo,
-            listName: 'Default',
+            listName: selectList,
             YDate: dateTime.date,
             TDate: dateTime.time,
             chack: false,
@@ -98,12 +119,16 @@ const CreateToDo = () => {
         ];
         await AsyncStorage.setItem('ToDos', JSON.stringify(Obj));
         setData((pre: any) => [...pre, Obj[0]]);
+        HomeScreen.navigate('Home');
       }
     } else {
       setAnimate(true);
       Vibration.vibrate(600);
     }
   };
+  //----------------------------------------------------------------------------------
+  // const MiniMumDateFun = () => {};
+  // const MinimumTimeFun = () => {};
 
   return (
     <View style={style.Contuner}>
@@ -115,6 +140,7 @@ const CreateToDo = () => {
           placeholder="Enter Task Here"
           placeholderTextColor={'#d1e3e3'}
           style={style.InputFild}
+          onSubmitEditing={SaveData}
           value={todo}
           onChange={event => setTodo(event.nativeEvent.text)}
         />
@@ -144,59 +170,44 @@ const CreateToDo = () => {
       {showpic && (
         <DateTimePicker
           mode={dateTime.date ? 'time' : 'date'}
-          display="compact"
+          display="spinner"
           value={date}
           onChange={dateTimePickerset}
+          minimumDate={!dateTime.date ? new Date() : undefined}
         />
       )}
       <Text style={style.titleText}>Add to List</Text>
       <View style={style.AddListCon}>
-        <Text style={style.Texts}>Default List</Text>
-        {/* -------------------------modal list add ---------------------------*/}
+        <Text style={style.Texts}>{selectList}</Text>
+        {/* ----------------------------------modal list add --------------------------------*/}
         <Modal
           transparent={true}
-          onRequestClose={() => setList(false)}
-          visible={list}>
-          <TouchableWithoutFeedback onPress={() => setList(false)}>
+          onRequestClose={() => setListx(false)}
+          visible={listx}>
+          <TouchableWithoutFeedback onPress={() => setListx(false)}>
             <View style={style.OuterListModal}>
-              <TouchableWithoutFeedback>
-                <View style={style.innerListModal}>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                  {/* ------------------------------ */}
-                  <TouchableOpacity style={style.ListBar}>
-                    <Text style={style.BarText}>ok</Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableWithoutFeedback>
+              <View style={style.innerListModal}>
+                {list.map((value: any, index: React.Key | null | undefined) => {
+                  return (
+                    <TouchableOpacity
+                      style={
+                        selectList === value.title
+                          ? style.ActiveListBar
+                          : style.ListBar
+                      }
+                      key={index}
+                      onPress={() => setSelectList(value.title)}>
+                      <Text style={style.BarText}>{value.title}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
 
         <View style={style.IconSet}>
-          <TouchableOpacity onPress={() => setList(true)}>
+          <TouchableOpacity onPress={() => setListx(true)}>
             <Calender name="caretdown" color={'#fff'} size={20} />
           </TouchableOpacity>
           <TouchableOpacity>
@@ -205,9 +216,7 @@ const CreateToDo = () => {
         </View>
       </View>
       <View>
-        <TouchableOpacity
-          style={todo ? style.relative : style.AddToDo}
-          onPress={SaveData}>
+        <TouchableOpacity style={style.AddToDo} onPress={SaveData}>
           <Calender name="checkcircleo" color={'#fff'} size={50} />
         </TouchableOpacity>
       </View>
@@ -278,17 +287,17 @@ const style = StyleSheet.create({
     elevation: 10,
     transform: [{translateX: 290}, {translateY: 170}],
   },
-  relative: {
-    width: 80,
-    height: 80,
-    position: 'relative',
-    backgroundColor: '#02aeba',
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 10,
-    transform: [{translateX: 290}, {translateY: -50}],
-  },
+  // relative: {
+  //   width: 80,
+  //   height: 80,
+  //   position: 'relative',
+  //   backgroundColor: '#02aeba',
+  //   borderRadius: 40,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   elevation: 10,
+  //   transform: [{translateX: 290}, {translateY: -50}],
+  // },
   OuterListModal: {
     width: '100%',
     height: '100%',
@@ -310,7 +319,15 @@ const style = StyleSheet.create({
     height: 40,
     marginVertical: 1,
     borderRadius: 3,
-    backgroundColor: 'rgb(14, 78, 48)',
+    backgroundColor: '#384538',
+    justifyContent: 'center',
+  },
+  ActiveListBar: {
+    width: '100%',
+    height: 40,
+    marginVertical: 1,
+    borderRadius: 3,
+    backgroundColor: '#1ec74b',
     justifyContent: 'center',
   },
   BarText: {
