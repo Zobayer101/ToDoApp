@@ -12,7 +12,6 @@ import {
   View,
   Vibration,
   Platform,
-  Alert,
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Feather';
@@ -65,6 +64,7 @@ const Home = () => {
   //const [datax, setDatax] = useState(false);
   const [listModal, setListModal] = useState(false);
   const [settin, setSetting] = useState(false);
+  const [allList, setAllList] = useState(false);
   const [inputText, setInputText] = useState('');
   const navigat = useNavigation<NewTaskScreenNavigationProp>();
   const newNavigate = useNavigation<newTaskScreenNavigate>();
@@ -96,18 +96,16 @@ const Home = () => {
     );
   }, []);
 
-  useEffect(() => {
-    console.log(selectList);
-  }, [selectList]);
+  const SelectAndUpdate = (id: any) => {
+    setData(pre =>
+      pre.map(item => (item.id === id ? {...item, chack: !item.chack} : item)),
+    );
 
-  const SelectAndRemove = (id: any) => {
-    const UpdateData = data.filter((item: {id: any}) => item.id !== id);
-    setData(UpdateData);
-    console.log(UpdateData);
     Vibration.vibrate(100);
   };
 
   const SaveData = async () => {
+    //Alert.alert('ok');
     if (inputText) {
       Vibration.vibrate(200);
       let stordata = await AsyncStorage.getItem('ToDos');
@@ -118,7 +116,7 @@ const Home = () => {
         let newObj = {
           id: ID,
           title: inputText,
-          listName: 'Default',
+          listName: selectList,
           YDate: '',
           TDate: '',
           chack: false,
@@ -131,12 +129,13 @@ const Home = () => {
         }
 
         await AsyncStorage.setItem('ToDos', JSON.stringify(todoNewData));
+        setInputText('');
       } else {
         let Obj = [
           {
             id: 1,
             title: inputText,
-            listName: 'Default',
+            listName: selectList,
             YDate: '',
             TDate: '',
             chack: false,
@@ -144,7 +143,17 @@ const Home = () => {
         ];
         await AsyncStorage.setItem('ToDos', JSON.stringify(Obj));
         setData((pre: any) => [...pre, Obj[0]]);
+        setInputText('');
       }
+      setList(pre =>
+        pre.map(values =>
+          values.title === selectList
+            ? {...values, lengths: values.lengths + 1}
+            : values,
+        ),
+      );
+
+      await AsyncStorage.setItem('List', JSON.stringify(list));
     }
   };
 
@@ -174,7 +183,7 @@ const Home = () => {
             style={style.Icons}
           />
           <Text onPress={() => setListModal(true)} style={style.HeaderBoldText}>
-            {selectList}
+            {allList ? 'All List' : selectList}
           </Text>
           <TouchableOpacity onPress={() => setListModal(true)}>
             <Down name="caretdown" color={'#fff'} size={18} />
@@ -202,7 +211,12 @@ const Home = () => {
           <View style={style.ListModal}>
             <TouchableWithoutFeedback onPress={() => setListModal(false)}>
               <View style={style.MainModalList}>
-                <TouchableOpacity style={style.ListSelect}>
+                <TouchableOpacity
+                  style={style.ListSelect}
+                  onPress={() => {
+                    setAllList(true);
+                    setSelectList('Default');
+                  }}>
                   <Homex name="home" size={27} color={'#fff'} />
                   <Text style={style.Texts}>All List</Text>
                   <Text style={style.Texts}>{data.length}</Text>
@@ -214,7 +228,10 @@ const Home = () => {
                       <TouchableOpacity
                         style={style.HomeList}
                         key={index}
-                        onPress={() => setSelectList(value.title)}>
+                        onPress={() => {
+                          setSelectList(value.title);
+                          setAllList(false);
+                        }}>
                         <Down name="bars" size={30} color={'#fff'} />
                         <Text style={style.Texts}>{value.title}</Text>
                         <Text style={style.Texts}>{value.lengths}</Text>
@@ -271,9 +288,13 @@ const Home = () => {
       <ScrollView style={style.ScrollingArea}>
         {data[0] ? (
           data.map((value: any, index: React.Key | null | undefined) => {
-            return value.listName === `${selectList}` ? (
+            return (
+              allList
+                ? !value.chack
+                : value.listName === `${selectList}` && !value.chack
+            ) ? (
               <View key={index}>
-                <Text style={style.headerTx}>Later</Text>
+                {/* <Text style={style.headerTx}>Later</Text> */}
                 <View style={style.todoCon}>
                   {/* <TouchableOpacity
                     onPress={() => SelectAndRemove(value.id)}
@@ -287,7 +308,7 @@ const Home = () => {
                       <CheckBox
                         value={value.chack}
                         onChange={() => {
-                          SelectAndRemove(value.id);
+                          SelectAndUpdate(value.id);
                         }}
                         tintColors={{true: 'green', false: '#fff'}}
                       />
@@ -332,10 +353,11 @@ const Home = () => {
           selectionColor={'#14fa07'}
           placeholderTextColor={'#666'}
           value={inputText}
+          onSubmitEditing={SaveData}
           onChange={e => setInputText(e.nativeEvent.text)}
         />
         {inputText && (
-          <TouchableOpacity style={style.CheckInput} onPress={() => SaveData()}>
+          <TouchableOpacity style={style.CheckInput} onPress={SaveData}>
             <Check name="check" size={35} color={'rgb(36, 255, 83)'} />
           </TouchableOpacity>
         )}

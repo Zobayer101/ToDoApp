@@ -38,6 +38,7 @@ const CreateToDo = () => {
   const [listx, setListx] = useState(false);
   const [date, setDate] = useState(new Date());
   const [animate, setAnimate] = useState(false);
+  const [addListModal, setAddlistModal] = useState(false);
   const [dateTime, setDateTime] = useState({date: '', time: ''});
   const [showpic, setPic] = useState(false);
   const [todo, setTodo] = useState(String);
@@ -52,9 +53,7 @@ const CreateToDo = () => {
       clearTimeout(setTime);
     };
   }, [animate]);
-  useEffect(() => {
-    console.log(selectList);
-  }, [selectList]);
+
   const dateTimePickerset = (_e: any, currentDate: any) => {
     if (dateTime.date) {
       setDate(currentDate || date);
@@ -75,11 +74,12 @@ const CreateToDo = () => {
     if (todo && dateTime.date && dateTime.time) {
       Vibration.vibrate(200);
       let stordata = await AsyncStorage.getItem('ToDos');
+
       if (stordata) {
         let TodoData = JSON.parse(stordata);
 
         let ID = TodoData.length + 1;
-        let newObj = {
+        var newObj = {
           id: ID,
           title: todo,
           listName: selectList,
@@ -121,14 +121,22 @@ const CreateToDo = () => {
         setData((pre: any) => [...pre, Obj[0]]);
         HomeScreen.navigate('Home');
       }
+
+      setList(pre =>
+        pre.map(values =>
+          values.title === selectList
+            ? {...values, lengths: values.lengths + 1}
+            : values,
+        ),
+      );
+
+      await AsyncStorage.setItem('List', JSON.stringify(list));
     } else {
       setAnimate(true);
       Vibration.vibrate(600);
     }
   };
   //----------------------------------------------------------------------------------
-  // const MiniMumDateFun = () => {};
-  // const MinimumTimeFun = () => {};
 
   return (
     <View style={style.Contuner}>
@@ -205,12 +213,22 @@ const CreateToDo = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
+        <Modal
+          transparent={true}
+          onRequestClose={() => setAddlistModal(false)}
+          visible={addListModal}>
+          <TouchableWithoutFeedback onPress={() => setAddlistModal(false)}>
+            <View style={style.OuterListModal}>
+              <Text>OK text</Text>
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
 
         <View style={style.IconSet}>
           <TouchableOpacity onPress={() => setListx(true)}>
             <Calender name="caretdown" color={'#fff'} size={20} />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => setAddlistModal(true)}>
             <Calender name="bars" color={'#fff'} size={30} />
           </TouchableOpacity>
         </View>

@@ -15,6 +15,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 //inter fase
 interface DalivaryContexType {
   selectList: String;
+  search: String;
+  setSearch: React.Dispatch<string>;
   setSelectList: React.Dispatch<string>;
   data: {
     id: number;
@@ -55,6 +57,10 @@ export const Dalivary = createContext<DalivaryContexType>({
   setSelectList: function (): void {
     throw new Error('Function not implemented.');
   },
+  search: '',
+  setSearch: (): void => {
+    throw new Error('Function not Implemented');
+  },
 });
 const stack = createNativeStackNavigator();
 const App = () => {
@@ -70,8 +76,9 @@ const App = () => {
   >([]);
   const [list, setList] = useState<
     {id: number; title: string; lengths: number}[]
-    >([]);
+  >([]);
   const [selectList, setSelectList] = useState('default');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -126,7 +133,16 @@ const App = () => {
 
   return (
     <Dalivary.Provider
-      value={{data, setData, list, setList, selectList, setSelectList}}>
+      value={{
+        data,
+        setData,
+        list,
+        setList,
+        selectList,
+        setSelectList,
+        search,
+        setSearch,
+      }}>
       <NavigationContainer>
         <stack.Navigator initialRouteName="Home">
           <stack.Screen
@@ -161,6 +177,8 @@ const App = () => {
                   placeholder={'Search...'}
                   placeholderTextColor={'#fff'}
                   autoFocus={true}
+                  value={search}
+                  onChange={e => setSearch(e.nativeEvent.text)}
                 />
               ),
 
