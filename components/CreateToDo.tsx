@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Vibration,
+  Alert,
 } from 'react-native';
 import Mic from 'react-native-vector-icons/Ionicons';
 import Calender from 'react-native-vector-icons/AntDesign';
@@ -17,16 +18,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Dalivary} from '../App';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {Trime} from './Lib';
 
 const position = new Animated.ValueXY({x: 500, y: 450});
-const ShowAnimate = () => {
-  Animated.timing(position, {
-    toValue: {x: 50, y: 450},
-    duration: 1000,
-    useNativeDriver: true,
-  }).start();
-};
-ShowAnimate();
+
 type RootStackParamList = {
   Home: undefined;
 };
@@ -37,7 +32,7 @@ type HomeScreenNavigation = NativeStackNavigationProp<
 const CreateToDo = () => {
   const [listx, setListx] = useState(false);
   const [date, setDate] = useState(new Date());
-  const [animate, setAnimate] = useState(false);
+  const [listTexts, setListTexts] = useState('');
   const [addListModal, setAddlistModal] = useState(false);
   const [dateTime, setDateTime] = useState({date: '', time: ''});
   const [showpic, setPic] = useState(false);
@@ -45,14 +40,36 @@ const CreateToDo = () => {
   const {data, setData, list, setList, selectList, setSelectList} =
     useContext(Dalivary);
   const HomeScreen = useNavigation<HomeScreenNavigation>();
-  useEffect(() => {
-    const setTime = setTimeout(() => {
-      setAnimate(false);
-    }, 3000);
-    return () => {
-      clearTimeout(setTime);
-    };
-  }, [animate]);
+  // useEffect(() => {
+  //   const setTime = setTimeout(() => {
+  //     Animated.timing(position, {
+  //       toValue: {x: 500, y: 450},
+  //       duration: 1000,
+  //       useNativeDriver: true,
+  //     }).start();
+  //     setAnimate(false);
+  //   }, 3000);
+  //   return () => {
+  //     clearTimeout(setTime);
+  //   };
+  // }, [animate]);
+
+  // -----------------animation---------
+  const ShowAnimate = () => {
+    Animated.sequence([
+      Animated.timing(position, {
+        toValue: {x: 50, y: 450},
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.delay(800),
+      Animated.timing(position, {
+        toValue: {x: 400, y: 450},
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
 
   const dateTimePickerset = (_e: any, currentDate: any) => {
     if (dateTime.date) {
@@ -132,12 +149,32 @@ const CreateToDo = () => {
 
       await AsyncStorage.setItem('List', JSON.stringify(list));
     } else {
-      setAnimate(true);
+      ShowAnimate();
       Vibration.vibrate(600);
     }
   };
   //----------------------------------------------------------------------------------
+  const AddNewList = async () => {
+    if (listTexts) {
+      let ListLocalData = await AsyncStorage.getItem('List');
+      if (ListLocalData) {
+        let LocalArrobj = JSON.parse(ListLocalData);
+        let RealObj = {
+          id: LocalArrobj[LocalArrobj.length - 1].id + 1,
+          title: listTexts,
+          lengths: 0,
+        };
 
+        setList(pre => [...pre, RealObj]);
+        let SaveStoreage = [...ListLocalData, ...[RealObj]];
+        await AsyncStorage.setItem('List', JSON.stringify(SaveStoreage));
+        setListTexts('');
+      }
+      setAddlistModal(false);
+    } else {
+      Alert.alert('Empty list');
+    }
+  };
   return (
     <View style={style.Contuner}>
       <Text style={style.titleText} onPress={() => console.log(data)}>
@@ -171,7 +208,7 @@ const CreateToDo = () => {
         />
       </View>
 
-      <Animated.Text style={animate ? style.messageText : style.messageStatice}>
+      <Animated.Text style={style.messageText}>
         All filds are required..
       </Animated.Text>
 
@@ -186,7 +223,7 @@ const CreateToDo = () => {
       )}
       <Text style={style.titleText}>Add to List</Text>
       <View style={style.AddListCon}>
-        <Text style={style.Texts}>{selectList}</Text>
+        <Text style={style.Texts}>{Trime(selectList.toString())}</Text>
         {/* ----------------------------------modal list add --------------------------------*/}
         <Modal
           transparent={true}
@@ -204,8 +241,11 @@ const CreateToDo = () => {
                           : style.ListBar
                       }
                       key={index}
-                      onPress={() => setSelectList(value.title)}>
-                      <Text style={style.BarText}>{value.title}</Text>
+                      onPress={() => {
+                        setSelectList(value.title);
+                        setListx(false);
+                      }}>
+                      <Text style={style.BarText}>{Trime(value.title)}</Text>
                     </TouchableOpacity>
                   );
                 })}
@@ -213,13 +253,34 @@ const CreateToDo = () => {
             </View>
           </TouchableWithoutFeedback>
         </Modal>
+        {/* Add new List modal  */}
         <Modal
           transparent={true}
           onRequestClose={() => setAddlistModal(false)}
           visible={addListModal}>
           <TouchableWithoutFeedback onPress={() => setAddlistModal(false)}>
             <View style={style.OuterListModal}>
-              <Text>OK text</Text>
+              <View style={style.AddListModal}>
+                <TextInput
+                  value={listTexts}
+                  placeholder="Add list"
+                  placeholderTextColor={'#fff'}
+                  style={style.InputFild}
+                  onChange={e => setListTexts(e.nativeEvent.text)}
+                />
+                <View style={style.AddBTNarea}>
+                  <TouchableOpacity style={style.btnArea}>
+                    <Text
+                      style={style.cancleText}
+                      onPress={() => setAddlistModal(false)}>
+                      cancile
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={style.btnArea} onPress={AddNewList}>
+                    <Text style={style.AddText}>Add</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </TouchableWithoutFeedback>
         </Modal>
@@ -305,17 +366,7 @@ const style = StyleSheet.create({
     elevation: 10,
     transform: [{translateX: 290}, {translateY: 170}],
   },
-  // relative: {
-  //   width: 80,
-  //   height: 80,
-  //   position: 'relative',
-  //   backgroundColor: '#02aeba',
-  //   borderRadius: 40,
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   elevation: 10,
-  //   transform: [{translateX: 290}, {translateY: -50}],
-  // },
+
   OuterListModal: {
     width: '100%',
     height: '100%',
@@ -367,20 +418,38 @@ const style = StyleSheet.create({
     elevation: 10,
     transform: [{translateX: position.x}, {translateY: position.y}],
   },
-  messageStatice: {
-    width: 300,
-    height: 50,
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    backgroundColor: 'rgba(88, 94, 91, 0.87)',
-    borderRadius: 10,
-    color: 'rgb(23, 247, 255)',
-    fontSize: 16,
-    zIndex: 1,
-    position: 'absolute',
+  AddListModal: {
+    alignSelf: 'center',
+    marginTop: 200,
+    width: 350,
+    height: 200,
+    backgroundColor: 'rgb(99, 100, 99)',
+    borderRadius: 5,
     elevation: 10,
-    transform: [{translateX: 500}, {translateY: 450}],
+    padding: 10,
   },
+  AddBTNarea: {
+    width: '100%',
+    paddingHorizontal: 20,
+    height: 100,
+    marginTop: 26,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  btnArea: {
+    height: 50,
+    width: 100,
+    backgroundColor: '#fff',
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancleText: {
+    fontSize: 16,
+    color: '#d50',
+  },
+  AddText: {fontSize: 16, color: '#0a3'},
 });
 
 export default CreateToDo;

@@ -7,213 +7,37 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useContext} from 'react';
+import {Dalivary} from '../App';
+import {Trime} from './Lib';
 
 const TaskList = () => {
+  const {list} = useContext(Dalivary);
   return (
     <ScrollView style={style.TaskCon}>
       {/* ------------------------------ */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
+
+      {list.map((value, index) => {
+        return (
+          <View style={style.ItemBox} key={index}>
+            <View style={style.ItemMain}>
+              <TouchableOpacity>
+                <Text style={style.TitleText}>{Trime(value.title)}</Text>
+                <Text style={style.titlebottom}>Tasks:{value.lengths}</Text>
+              </TouchableOpacity>
+              <View style={style.IconBox}>
+                <TouchableOpacity>
+                  <Penx name="pen" color={'#fff'} size={20} />
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <Delete name="delete" color={'#fff'} size={30} />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
-        </View>
-      </View>
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
+        );
+      })}
       {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      {/* ------------------------------- */}
-      <View style={style.ItemBox}>
-        <View style={style.ItemMain}>
-          <TouchableOpacity>
-            <Text style={style.TitleText}>Defaulst</Text>
-            <Text style={style.titlebottom}>Tasks:4</Text>
-          </TouchableOpacity>
-          <View style={style.IconBox}>
-            <TouchableOpacity>
-              <Penx name="pen" color={'#fff'} size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Delete name="delete" color={'#fff'} size={30} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
     </ScrollView>
   );
 };
@@ -224,13 +48,13 @@ const style = StyleSheet.create({
     backgroundColor: '#3616c4',
   },
   ItemBox: {
-    marginTop: 20,
+    marginVertical: 10,
     width: '100%',
     height: 70,
   },
   ItemMain: {
     marginHorizontal: 30,
-    backgroundColor: '#029c37',
+    backgroundColor: '#280f7a',
     height: 70,
     width: '85%',
     borderRadius: 10,

@@ -12,6 +12,7 @@ import {
   View,
   Vibration,
   Platform,
+  Alert,
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Feather';
@@ -27,6 +28,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification';
 
 import {PermissionsAndroid} from 'react-native';
+import {Trime} from './Lib';
 
 async function requestNotificationPermission() {
   await PermissionsAndroid.request(
@@ -66,6 +68,8 @@ const Home = () => {
   const [settin, setSetting] = useState(false);
   const [allList, setAllList] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [listTexts, setListTexts] = useState('');
+  const [addListModal, setAddlistModal] = useState(false);
   const navigat = useNavigation<NewTaskScreenNavigationProp>();
   const newNavigate = useNavigation<newTaskScreenNavigate>();
   const SettingNavigate = useNavigation<settingScreenNavigte>();
@@ -77,9 +81,9 @@ const Home = () => {
   useEffect(() => {
     requestNotificationPermission();
     PushNotification.configure({
-      onNotification: function (notification) {
-        console.log('NOTIFICATION:', notification);
-      },
+      // onNotification: function (notification) {
+      //   console.log('NOTIFICATION:', notification);
+      // },
       popInitialNotification: true,
       //requestPermissions: true,
       requestPermissions: Platform.OS === 'ios',
@@ -95,6 +99,15 @@ const Home = () => {
       () => '',
     );
   }, []);
+  // useEffect(() => {
+  //   PushNotification.localNotificationSchedule({
+  //     channelId: 'test-notification',
+  //     title: 'Dilay Notification',
+  //     message: 'This is an Test Notification',
+  //     date: (new Date().valueOf() + 100).toString(),
+  //     allowWhileIdle: true,
+  //   });
+  // }, []);
 
   const SelectAndUpdate = (id: any) => {
     setData(pre =>
@@ -156,22 +169,52 @@ const Home = () => {
       await AsyncStorage.setItem('List', JSON.stringify(list));
     }
   };
+  const AddNewList = async () => {
+    if (listTexts) {
+      let ListLocalData = await AsyncStorage.getItem('List');
+      if (ListLocalData) {
+        let LocalArrobj = JSON.parse(ListLocalData);
+        let RealObj = {
+          id: LocalArrobj[LocalArrobj.length - 1].id + 1,
+          title: listTexts,
+          lengths: 0,
+        };
 
-  const HandelNotification = (notification: string) => {
+        setList(pre => [...pre, RealObj]);
+        let SaveStoreage = [...ListLocalData, ...[RealObj]];
+        await AsyncStorage.setItem('List', JSON.stringify(SaveStoreage));
+        setListTexts('');
+      }
+      setAddlistModal(false);
+    } else {
+      Alert.alert('Empty list');
+    }
+  };
+  const HandelNotification = () => {
     //Alert.alert(`Notification ID: ${notification}`);
 
     PushNotification.localNotification({
       channelId: 'test-notification', // Ensure it matches the channel ID
-      title: `You clicked on ID: ${notification}`,
+      title: 'This is high time for toDo!',
       message: 'This is a local notification message.',
       importance: 'high', // Ensures visibility on Android
       priority: 'high',
-      bigText: 'Extended notification text for additional context.',
+      bigText: 'Extended notification text for somthood and perfected ok...',
       vibrate: true,
       playSound: true,
     });
   };
-
+  const Notify = () => {
+    PushNotification.localNotificationSchedule({
+      channelId: 'test-notification',
+      title: 'Dilay Notification',
+      message: 'This is an Test Notification',
+      date: new Date(Date.now() + 10 * 1000),
+      allowWhileIdle: true,
+    });
+  };
+  Notify();
+  // console.log(new Date(Date.now()));
   return (
     <View style={style.Contuner}>
       <View style={style.Header}>
@@ -183,7 +226,7 @@ const Home = () => {
             style={style.Icons}
           />
           <Text onPress={() => setListModal(true)} style={style.HeaderBoldText}>
-            {allList ? 'All List' : selectList}
+            {allList ? 'All List' : Trime(selectList.toString())}
           </Text>
           <TouchableOpacity onPress={() => setListModal(true)}>
             <Down name="caretdown" color={'#fff'} size={18} />
@@ -216,6 +259,7 @@ const Home = () => {
                   onPress={() => {
                     setAllList(true);
                     setSelectList('Default');
+                    setListModal(false);
                   }}>
                   <Homex name="home" size={27} color={'#fff'} />
                   <Text style={style.Texts}>All List</Text>
@@ -231,16 +275,22 @@ const Home = () => {
                         onPress={() => {
                           setSelectList(value.title);
                           setAllList(false);
+                          setListModal(false);
                         }}>
                         <Down name="bars" size={30} color={'#fff'} />
-                        <Text style={style.Texts}>{value.title}</Text>
+                        <Text style={style.Texts}>{Trime(value.title)}</Text>
                         <Text style={style.Texts}>{value.lengths}</Text>
                       </TouchableOpacity>
                     ),
                   )}
 
                 {/* ----------------------Dainamick List-------------------------------- */}
-                <TouchableOpacity style={style.HomeList}>
+                <TouchableOpacity
+                  style={style.HomeList}
+                  onPress={() => {
+                    setAddlistModal(true);
+                    setListModal(false);
+                  }}>
                   <Down name="bars" size={30} color={'#fff'} />
                   <Text style={style.Texts}>Add new List</Text>
                   <Down name="pluscircleo" color={'#fff'} size={20} />
@@ -250,7 +300,39 @@ const Home = () => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-      {/* setting modal */}
+
+      {/* Add List Modal */}
+      <Modal
+        transparent={true}
+        onRequestClose={() => setAddlistModal(false)}
+        visible={addListModal}>
+        <TouchableWithoutFeedback onPress={() => setAddlistModal(false)}>
+          <View style={style.OuterListModal}>
+            <View style={style.AddListModal}>
+              <TextInput
+                value={listTexts}
+                placeholder="Add list"
+                placeholderTextColor={'#fff'}
+                style={style.InputFild}
+                onChange={e => setListTexts(e.nativeEvent.text)}
+              />
+              <View style={style.AddBTNarea}>
+                <TouchableOpacity style={style.btnArea}>
+                  <Text
+                    style={style.cancleText}
+                    onPress={() => setAddlistModal(false)}>
+                    cancile
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={style.btnArea} onPress={AddNewList}>
+                  <Text style={style.AddText}>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+      {/* Settings modal */}
       <Modal
         transparent={true}
         visible={settin}
@@ -303,7 +385,7 @@ const Home = () => {
                   </TouchableOpacity> */}
                   <TouchableOpacity
                     style={style.Chekbox}
-                    onPress={() => HandelNotification(value.id.toString())}>
+                    onPress={() => HandelNotification()}>
                     <View style={style.MainTitlecheckbox}>
                       <CheckBox
                         value={value.chack}
@@ -575,6 +657,55 @@ const style = StyleSheet.create({
     fontSize: 16,
     marginLeft: 50,
     color: '#03ff9e',
+  },
+  OuterListModal: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  AddListModal: {
+    alignSelf: 'center',
+    marginTop: 200,
+    width: 350,
+    height: 200,
+    backgroundColor: 'rgb(99, 100, 99)',
+    borderRadius: 5,
+    elevation: 10,
+    padding: 10,
+  },
+  AddBTNarea: {
+    width: '100%',
+    paddingHorizontal: 20,
+    height: 100,
+    marginTop: 26,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  btnArea: {
+    height: 50,
+    width: 100,
+    backgroundColor: '#fff',
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancleText: {
+    fontSize: 16,
+    color: '#d50',
+  },
+  AddText: {fontSize: 16, color: '#0a3'},
+  InputFild: {
+    padding: 0,
+    fontSize: 22,
+    color: '#fff',
+    borderBottomColor: '#12f9fc',
+    borderBottomWidth: 1.5,
+    height: 40,
+    width: 280,
+    flexDirection: 'row',
+    marginLeft: 25,
   },
 });
 
