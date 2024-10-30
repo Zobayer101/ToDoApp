@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   Image,
   Modal,
@@ -11,7 +11,6 @@ import {
   TouchableWithoutFeedback,
   View,
   Vibration,
-  Platform,
   Alert,
 } from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -25,16 +24,8 @@ import Check from 'react-native-vector-icons/AntDesign';
 import CheckBox from '@react-native-community/checkbox';
 import {Dalivary} from '../App';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PushNotification from 'react-native-push-notification';
 
-import {PermissionsAndroid} from 'react-native';
 import {Trime} from './Lib';
-
-async function requestNotificationPermission() {
-  await PermissionsAndroid.request(
-    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  );
-}
 
 type RootStackParamList = {
   Home: undefined;
@@ -78,27 +69,6 @@ const Home = () => {
   const {data, setData, list, setList, selectList, setSelectList} =
     useContext(Dalivary);
 
-  useEffect(() => {
-    requestNotificationPermission();
-    PushNotification.configure({
-      // onNotification: function (notification) {
-      //   console.log('NOTIFICATION:', notification);
-      // },
-      popInitialNotification: true,
-      //requestPermissions: true,
-      requestPermissions: Platform.OS === 'ios',
-    });
-    PushNotification.createChannel(
-      {
-        channelId: 'test-notification', // ID for this channel
-        channelName: 'Test Channel', // Name for this channel
-        channelDescription: 'A channel to send test notifications', // Optional
-        importance: 4, // Required to show heads-up notifications
-        vibrate: true, // Optional
-      },
-      () => '',
-    );
-  }, []);
   // useEffect(() => {
   //   PushNotification.localNotificationSchedule({
   //     channelId: 'test-notification',
@@ -190,30 +160,30 @@ const Home = () => {
       Alert.alert('Empty list');
     }
   };
-  const HandelNotification = () => {
-    //Alert.alert(`Notification ID: ${notification}`);
+  // const HandelNotification = () => {
 
-    PushNotification.localNotification({
-      channelId: 'test-notification', // Ensure it matches the channel ID
-      title: 'This is high time for toDo!',
-      message: 'This is a local notification message.',
-      importance: 'high', // Ensures visibility on Android
-      priority: 'high',
-      bigText: 'Extended notification text for somthood and perfected ok...',
-      vibrate: true,
-      playSound: true,
-    });
-  };
-  const Notify = () => {
-    PushNotification.localNotificationSchedule({
-      channelId: 'test-notification',
-      title: 'Dilay Notification',
-      message: 'This is an Test Notification',
-      date: new Date(Date.now() + 10 * 1000),
-      allowWhileIdle: true,
-    });
-  };
-  Notify();
+  //   PushNotification.localNotification({
+  //     channelId: 'test-notification', // Ensure it matches the channel ID
+  //     title: 'This is high time for toDo!',
+  //     message: 'This is a local notification message.',
+  //     importance: 'high', // Ensures visibility on Android
+  //     priority: 'high',
+  //     bigText: 'Extended notification text for somthood and perfected ok...',
+  //     vibrate: true,
+  //     playSound: true,
+  //   });
+  // };
+  // const Notify = () => {
+  //   PushNotification.localNotificationSchedule({
+  //     channelId: 'test-notification',
+  //     title: 'Dilay Notification',
+  //     message: 'This is an Test Notification',
+  //     date: new Date(Date.now() + 10 * 1000),
+  //     allowWhileIdle: true,
+  //     playSound: true,
+  //   });
+  // };
+  // Notify();
   // console.log(new Date(Date.now()));
   return (
     <View style={style.Contuner}>
@@ -383,9 +353,7 @@ const Home = () => {
                     style={style.Icon}>
                     <Delete name="delete" size={35} color={'#fff'} />
                   </TouchableOpacity> */}
-                  <TouchableOpacity
-                    style={style.Chekbox}
-                    onPress={() => HandelNotification()}>
+                  <TouchableOpacity style={style.Chekbox}>
                     <View style={style.MainTitlecheckbox}>
                       <CheckBox
                         value={value.chack}

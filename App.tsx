@@ -6,12 +6,25 @@ import CreateToDo from './components/CreateToDo';
 import Searching from './components/Serching';
 import Bar from 'react-native-vector-icons/AntDesign';
 
-import {Alert, StyleSheet, TextInput, TouchableOpacity} from 'react-native';
+import {
+  Alert,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  PermissionsAndroid,
+  Platform,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import Settings from './components/Settings';
 import TaskList from './components/Task';
 import Batch from './components/BatchMode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import PushNotification from 'react-native-push-notification';
+async function requestNotificationPermission() {
+  await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+  );
+}
 //inter fase
 interface DalivaryContexType {
   selectList: String;
@@ -129,6 +142,24 @@ const App = () => {
         await AsyncStorage.setItem('List', JSON.stringify(ArrObj));
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    requestNotificationPermission();
+    PushNotification.configure({
+      popInitialNotification: true,
+      requestPermissions: Platform.OS === 'ios',
+    });
+    PushNotification.createChannel(
+      {
+        channelId: 'todo-app-notification',
+        channelName: 'DailyToDo',
+        channelDescription: 'Make shoure that your prodactive incress',
+        importance: 4,
+        vibrate: true,
+      },
+      () => '',
+    );
   }, []);
 
   return (

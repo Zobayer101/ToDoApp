@@ -1,4 +1,4 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import {Dalivary} from '../App';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {Trime} from './Lib';
+import PushNotification from 'react-native-push-notification';
 
 const position = new Animated.ValueXY({x: 500, y: 450});
 
@@ -35,11 +36,28 @@ const CreateToDo = () => {
   const [listTexts, setListTexts] = useState('');
   const [addListModal, setAddlistModal] = useState(false);
   const [dateTime, setDateTime] = useState({date: '', time: ''});
+  const [notify, setNotify] = useState();
   const [showpic, setPic] = useState(false);
   const [todo, setTodo] = useState(String);
   const {data, setData, list, setList, selectList, setSelectList} =
     useContext(Dalivary);
   const HomeScreen = useNavigation<HomeScreenNavigation>();
+
+  useEffect(() => {
+    if (notify) {
+      PushNotification.localNotificationSchedule({
+        channelId: 'test-notification',
+        title: 'Dilay Notification',
+        message: 'This is an Test Notification',
+        date: notify,
+        allowWhileIdle: true,
+        playSound: true,
+        vibrate: true,
+      });
+      setNotify(undefined);
+    }
+    console.log(notify);
+  }, [notify]);
   // useEffect(() => {
   //   const setTime = setTimeout(() => {
   //     Animated.timing(position, {
@@ -70,15 +88,31 @@ const CreateToDo = () => {
       }),
     ]).start();
   };
-
+  // const willNotification = () => {
+  //   console.log('ok');
+  //   PushNotification.scheduleLocalNotification({
+  //     channelId: 'todo-app-notification',
+  //     title: 'ok',
+  //     message: 'This work was promise you',
+  //     date: new Date(Date.now() + 10 * 10),
+  //     allowWhileIdle: true,
+  //     playSound: true,
+  //     vibrate: true,
+  //   });
+  // };
+  // willNotification();
   const dateTimePickerset = (_e: any, currentDate: any) => {
     if (dateTime.date) {
       setDate(currentDate || date);
-      setDateTime(pre => ({
-        ...pre,
-        time: currentDate.toLocaleTimeString(),
-      }));
-      setPic(false);
+      if (new Date() < new Date(currentDate)) {
+        setDateTime(pre => ({
+          ...pre,
+          time: currentDate.toLocaleTimeString(),
+        }));
+        setNotify(currentDate);
+        //willNotification(todo, currentDate);
+        setPic(false);
+      }
     } else {
       setDate(currentDate || date);
       setDateTime(pre => ({...pre, date: currentDate.toLocaleDateString()}));
@@ -168,6 +202,7 @@ const CreateToDo = () => {
         setList(pre => [...pre, RealObj]);
         let SaveStoreage = [...ListLocalData, ...[RealObj]];
         await AsyncStorage.setItem('List', JSON.stringify(SaveStoreage));
+        setSelectList(listTexts);
         setListTexts('');
       }
       setAddlistModal(false);
