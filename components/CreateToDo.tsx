@@ -44,11 +44,11 @@ const CreateToDo = () => {
   const HomeScreen = useNavigation<HomeScreenNavigation>();
 
   useEffect(() => {
-    if (notify) {
+    if (notify && todo) {
       PushNotification.localNotificationSchedule({
-        channelId: 'test-notification',
-        title: 'Dilay Notification',
-        message: 'This is an Test Notification',
+        channelId: 'todo-app-notification',
+        title: todo,
+        message: 'This work was promise you',
         date: notify,
         allowWhileIdle: true,
         playSound: true,
@@ -56,8 +56,7 @@ const CreateToDo = () => {
       });
       setNotify(undefined);
     }
-    console.log(notify);
-  }, [notify]);
+  }, [notify, todo]);
   // useEffect(() => {
   //   const setTime = setTimeout(() => {
   //     Animated.timing(position, {
@@ -115,6 +114,7 @@ const CreateToDo = () => {
       }
     } else {
       setDate(currentDate || date);
+
       setDateTime(pre => ({...pre, date: currentDate.toLocaleDateString()}));
     }
 
@@ -212,9 +212,7 @@ const CreateToDo = () => {
   };
   return (
     <View style={style.Contuner}>
-      <Text style={style.titleText} onPress={() => console.log(data)}>
-        What is to be done?
-      </Text>
+      <Text style={style.titleText}>What is to be done?</Text>
       <View style={style.InputSection}>
         <TextInput
           placeholder="Enter Task Here"

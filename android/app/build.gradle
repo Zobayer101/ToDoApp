@@ -88,7 +88,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-         targetSdkVersion 31 // Ensure target SDK is set to 31 or above
+         targetSdkVersion 33 // Ensure target SDK is set to 31 or above
         minSdkVersion 23 // Adjust based on your requirements
         //multiDexEnabled true
     

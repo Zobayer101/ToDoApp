@@ -20,11 +20,55 @@ import TaskList from './components/Task';
 import Batch from './components/BatchMode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PushNotification from 'react-native-push-notification';
+
 async function requestNotificationPermission() {
-  await PermissionsAndroid.request(
-    PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  );
+  if (Platform.OS === 'android') {
+    try {
+      // Request POST_NOTIFICATIONS for Android 13+ if supported
+      if (Platform.Version >= 33) {
+        const postNotifications =
+          PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS;
+
+        if (postNotifications) {
+          const postNotificationStatus = await PermissionsAndroid.request(
+            postNotifications,
+          );
+
+          if (postNotificationStatus !== PermissionsAndroid.RESULTS.GRANTED) {
+            Alert.alert(
+              'Permission Denied',
+              'Notification permission is required for this app to function properly.',
+            );
+            return false;
+          }
+        }
+      }
+
+      // Request SCHEDULE_EXACT_ALARM for Android 12+ if supported
+      if (Platform.Version >= 31) {
+        const exactAlarm = PermissionsAndroid.PERMISSIONS.SCHEDULE_EXACT_ALARM;
+
+        if (exactAlarm) {
+          const exactAlarmStatus = await PermissionsAndroid.request(exactAlarm);
+
+          if (exactAlarmStatus !== PermissionsAndroid.RESULTS.GRANTED) {
+            Alert.alert(
+              'Permission Denied',
+              'Exact alarm permission is required for timely notifications.',
+            );
+            return false;
+          }
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error requesting notification permissions:', error);
+      return false;
+    }
+  }
 }
+
 //inter fase
 interface DalivaryContexType {
   selectList: String;
@@ -77,6 +121,30 @@ export const Dalivary = createContext<DalivaryContexType>({
 });
 const stack = createNativeStackNavigator();
 const App = () => {
+  useEffect(() => {
+    (async () => {
+      const permissionsGranted = await requestNotificationPermission();
+
+      if (permissionsGranted) {
+        PushNotification.configure({
+          popInitialNotification: true,
+          requestPermissions: Platform.OS === 'ios',
+        });
+
+        PushNotification.createChannel(
+          {
+            channelId: 'todo-app-notification',
+            channelName: 'DailyToDo',
+            channelDescription: 'Ensure your productivity increases',
+            importance: 4,
+            vibrate: true,
+          },
+          () => '',
+        );
+      }
+    })();
+  }, []);
+
   const [data, setData] = useState<
     {
       id: number;
@@ -142,24 +210,6 @@ const App = () => {
         await AsyncStorage.setItem('List', JSON.stringify(ArrObj));
       }
     })();
-  }, []);
-
-  useEffect(() => {
-    requestNotificationPermission();
-    PushNotification.configure({
-      popInitialNotification: true,
-      requestPermissions: Platform.OS === 'ios',
-    });
-    PushNotification.createChannel(
-      {
-        channelId: 'todo-app-notification',
-        channelName: 'DailyToDo',
-        channelDescription: 'Make shoure that your prodactive incress',
-        importance: 4,
-        vibrate: true,
-      },
-      () => '',
-    );
   }, []);
 
   return (

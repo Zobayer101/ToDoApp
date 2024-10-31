@@ -69,15 +69,7 @@ const Home = () => {
   const {data, setData, list, setList, selectList, setSelectList} =
     useContext(Dalivary);
 
-  // useEffect(() => {
-  //   PushNotification.localNotificationSchedule({
-  //     channelId: 'test-notification',
-  //     title: 'Dilay Notification',
-  //     message: 'This is an Test Notification',
-  //     date: (new Date().valueOf() + 100).toString(),
-  //     allowWhileIdle: true,
-  //   });
-  // }, []);
+
 
   const SelectAndUpdate = (id: any) => {
     setData(pre =>
