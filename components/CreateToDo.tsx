@@ -53,6 +53,7 @@ const CreateToDo = () => {
         allowWhileIdle: true,
         playSound: true,
         vibrate: true,
+        
       });
       setNotify(undefined);
     }

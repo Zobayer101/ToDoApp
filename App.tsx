@@ -138,6 +138,7 @@ const App = () => {
             channelDescription: 'Ensure your productivity increases',
             importance: 4,
             vibrate: true,
+            
           },
           () => '',
         );
